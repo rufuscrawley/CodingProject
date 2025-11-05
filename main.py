@@ -166,9 +166,22 @@ def graph_eigenvalues(spring_constant, iteration_count):
     # Plot all masses
     fig, ax = plt.subplots()
     ax.plot(spaced_masses, frequencies_1, label='f_1')
-    ax.plot(spaced_masses, correct_frequencies_1, label='numeric f_1')
+    # ax.plot(spaced_masses, correct_frequencies_1, label='numeric f_1')
     ax.plot(spaced_masses, frequencies_2, label='f_2')
-    ax.plot(spaced_masses, correct_frequencies_2, label='numeric f_2')
+    # ax.plot(spaced_masses, correct_frequencies_2, label='numeric f_2')
+
+    fig_2, ax_2 = plt.subplots()
+    differences = []
+    for number, frequency in enumerate(frequencies_1):
+        differences.append(frequency - correct_frequencies_2[number])
+    differences_2 = []
+    for number, frequency in enumerate(frequencies_2):
+        differences_2.append(frequency - correct_frequencies_1[number])
+    ax_2.plot(spaced_masses, differences_2)
+    ax_2.set(ylabel='deviation (Hz)', xlabel='mass (kg)',
+             title='Differences')
+    ax_2.legend()
+    ax_2.grid()
 
     # Legends
     ax.set(ylabel='frequency (Hz)', xlabel='mass (kg)',
@@ -208,11 +221,13 @@ elif graphing_mode == "n":
 
 if graphing_mode:
     print("=== Graphing mode selected! ===")
+    # Prints a graph of m against frequency, alongside a graph for the deviation for numerical vs. QU
     k = input_sanitised("Input spring constant: ", float)
     it = input_sanitised("Input number of iterations (more=slower but more accurate): ", int)
     graph_eigenvalues(k, it)
 elif not graphing_mode:
     print("=== Manual mode selected ===")
+    # Mostly for debugging, but allows you to get manual eigenvalues for this problem
     mass_1 = input_sanitised("Input mass 1: ", float)
     mass_2 = input_sanitised("Input mass 2: ", float)
     spring_constant = input_sanitised("Input spring constant: ", float)
