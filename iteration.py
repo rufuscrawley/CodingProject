@@ -1,4 +1,4 @@
-from main_file import *
+from main import *
 
 matrix = [[-1, 0.5],
           [0.5, -1]]
