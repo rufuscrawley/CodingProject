@@ -86,10 +86,10 @@ class Body:
             sq_dist: float = self.dist_squared(body)
 
             # dampen
-            sq_dist = np.clip(sq_dist, 0.1, 10)
+            dampener = 0.1 ** 2
             dist: float = np.sqrt(sq_dist)
 
-            magnitude: float = (G * body.mass) / sq_dist
+            magnitude: float = (G * body.mass) / (sq_dist + dampener)
             acc.x += magnitude * (body.pos.x - self.pos.x) / dist
             acc.y += magnitude * (body.pos.y - self.pos.y) / dist
         self.acc = acc
