@@ -3,9 +3,8 @@ from typing import Any
 
 import numpy as np
 
-from utilities import Body, Vector2D
-
-
+from Body import Body
+from Vector2D import Vector2D
 
 
 def centre_of_mass(bodies: list[Body]) -> tuple[Vector2D, Vector2D]:
@@ -42,6 +41,9 @@ def verlet_integration(bodies: list[Body], end: float,
     t: float = 0
     # Allocate empty lists to store the x/y positions.
     body_list, energy_list, am_list = [], [], []
+    body_list.append(deepcopy(bodies[0]))
+    body_list.append(deepcopy(bodies[1]))
+    body_list.append(deepcopy(bodies[2]))
     while (t + step) <= end:
         # Calculate the position and velocity of the centre of mass first.
         pos_cm, vel_cm = centre_of_mass(bodies)
