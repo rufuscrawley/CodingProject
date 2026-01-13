@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 
 from Body import Body
@@ -44,11 +46,18 @@ def centre_of_mass(bodies: list[Body]) -> Vector2D:
     return pos_com
 
 
-def get_total_var(body_n, body_list, list_index):
+def get_total_var(body_n: int, body_list: list) -> list:
+    """
+    Finds the total of a variable of a list.
+    :param body_n:
+    :param body_list:
+    :return:
+    """
     params = []
     final_vars = []
+    # Make a list of each
     for i in range(body_n):
-        params.append(split_list(body_list[list_index], i, body_n))
+        params.append(split_list(body_list, i, body_n))
     for i in range(len(params[0])):
         var = 0
         for j in range(body_n):

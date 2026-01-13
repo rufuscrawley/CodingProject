@@ -67,22 +67,41 @@ class Body(object):
         # w = m * v * L
         return self.mass * dist * vel
 
-    def dist_squared(self, body):
+    def dist_squared(self, body) -> float:
+        """
+        Calculates the distance to a different body.
+        :param body: Body to calculate distance to.
+        :return: Distance magnitude.
+        """
         dist_vector = Vector2D(self.pos.x - body.pos.x,
                                self.pos.y - body.pos.y)
         return dist_vector.sq_mag()
 
     def ke(self) -> float:
-        energy = 0.5 * self.mass * self.vel.sq_mag()
-        return np.clip(energy, 0, energy)
+        """
+        Calculates the kinetic energy of the body at that moment in time.
+        :return: Kinetic energy in [J]
+        """
+        # E = 1/2 * m * v^2
 
-    def gpe(self, bodies, natural):
+        energy = 0.5 * self.mass * self.vel.sq_mag()
+        return energy
+
+    def gpe(self, bodies: list, natural: bool) -> float:
+        """
+        Calculates the GPE of the body against nearby other bodies.
+        :param bodies: A list of bodies that act upon this body.
+        :param natural: Whether to use natural units in the calculation or not.
+        :return: The GPE of the body in [J].
+        """
         result = 0
+        # Should we use natural units?
         G = 1 if natural else 6.67E-11
         for body in bodies:
             if self == body:
                 continue
             r_squared = self.dist_squared(body)
+            # U = - GMm / r
             result += -1 * (G * self.mass * body.mass) / np.sqrt(r_squared)
         return result
 
