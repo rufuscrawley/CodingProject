@@ -3,8 +3,6 @@ import pandas as pd
 
 from Vector2D import Vector2D
 
-natural_units = False
-
 
 class Body(object):
     name = ""
@@ -12,7 +10,7 @@ class Body(object):
 
     pos, vel, acc = Vector2D, Vector2D, Vector2D
 
-    def __init__(self, name, mass, pos, vel):
+    def __init__(self, name: str, mass: float, pos: Vector2D, vel: Vector2D) -> None:
         """
         :param name: The name of the stellar body
         :param mass: The body's mass (kg)
@@ -25,6 +23,7 @@ class Body(object):
         self.vel = vel
 
     def __str__(self):
+        # Redefined str() function for debugging values - may not be used in final build.
         return f"[{self.name}] - ({self.pos.x}, {self.pos.y}) @ ({self.vel.x}, {self.vel.y})"
 
     def update_acceleration(self, bodies: list, natural: bool) -> None:
@@ -33,30 +32,39 @@ class Body(object):
         :param natural: Whether to use natural units (G = 1) or not (G = 6.67E-11)
         :param bodies: The bodies acting upon this body.
         """
+        # Set up our variables
         acc = Vector2D(0, 0)
         G = 1 if natural else 6.67E-11
-
+        # Now calculate individual accelerations from each body
         for body in bodies:
             if self == body:
                 continue
             sq_dist: float = self.dist_squared(body)
-
-            # dampen
-            dampener = 0.0001 ** 2
             dist: float = np.sqrt(sq_dist)
-
+            # Apply dampening
+            dampener = 0.0001 ** 2
             magnitude: float = (G * body.mass) / (sq_dist + dampener)
+            # Update the acceleration
             acc.x += magnitude * (body.pos.x - self.pos.x) / dist
             acc.y += magnitude * (body.pos.y - self.pos.y) / dist
+        # Apply the final calculated acceleration
         self.acc = acc
 
     def am(self, ref_point: Vector2D) -> float:
+        """
+        Calculates the angular momentum of a body against a defined point of reference.
+
+        The point of reference is usually a centre of mass in an N-body problem.
+        :param ref_point: The position of the point of reference
+        :return: The angular momentum
+        """
+        # Find the r vector between us and the point of reference.
         rel_pos = Vector2D(self.pos.x - ref_point.x,
                            self.pos.y - ref_point.y)
-
+        # Find distance and velocity vectors.
         dist: float = np.sqrt(rel_pos.sq_mag())
         vel: float = np.sqrt(self.vel.sq_mag())
-
+        # w = m * v * L
         return self.mass * dist * vel
 
     def dist_squared(self, body):

@@ -24,7 +24,7 @@ def verlet_integration(bodies: list[Body], end: float, step: float,
     with alive_bar(total_steps) as bar:
         while (t + step) <= end:
             # Calculate the position and velocity of the centre of mass first.
-            pos_cm, vel_cm = centre_of_mass(bodies)
+            pos_cm = centre_of_mass(bodies)
             for body in bodies:
                 if iterations == 0:
                     E_k_0: float = body.ke()
@@ -52,7 +52,8 @@ def verlet_integration(bodies: list[Body], end: float, step: float,
                 am_list.append(deepcopy(body.am(pos_cm)))
             t += step
             iterations += 1
-            t = np.round(t, get_decimal_places(step))
+            if np.log10(step) < 1:
+                t = np.round(t, get_decimal_places(step))
             bar()
 
     return body_list, energy_list, am_list

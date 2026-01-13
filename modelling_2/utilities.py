@@ -22,7 +22,7 @@ def get_decimal_places(value):
     return int(np.round(-np.log10(value)))
 
 
-def centre_of_mass(bodies: list[Body]) -> tuple[Vector2D, Vector2D]:
+def centre_of_mass(bodies: list[Body]) -> Vector2D:
     """
     Calculates the centre of mass of a list of bodies.
     :return: Position and then velocity as a Tuple.
@@ -31,25 +31,52 @@ def centre_of_mass(bodies: list[Body]) -> tuple[Vector2D, Vector2D]:
     # Define initial conditions of our system
     total_mass = 0
     pos_com = Vector2D(0, 0)
-    pos_vel = Vector2D(0, 0)
     # Multiply over each body
     for body in bodies:
         total_mass += body.mass
-        pos_com.add_mult(body.mass)
-        pos_vel.add_mult(body.mass)
+
+        pos_com.x += body.mass * body.pos.x
+        pos_com.y += body.mass * body.pos.y
+
     # Normalise CoM
     pos_com.multiply(1 / total_mass)
-    pos_vel.multiply(1 / total_mass)
 
-    return pos_com, pos_vel
+    return pos_com
+
+
+def get_total_var(body_n, body_list, list_index):
+    params = []
+    final_vars = []
+    for i in range(body_n):
+        params.append(split_list(body_list[list_index], i, body_n))
+    for i in range(len(params[0])):
+        var = 0
+        for j in range(body_n):
+            var += params[j][i]
+        final_vars.append(var)
+    return final_vars
+
+
+def is_within_percentage(n_1: float, n_2: float, percentage: float) -> bool:
+    """
+    Returns whether one number is within a % value of another number.
+    :param n_1:
+    :param n_2:
+    :param percentage: A percentage, out of 100.
+    :return:
+    """
+    decimal = percentage / 200.0
+    top = n_2 * (1.0 + decimal)
+    bottom = n_2 * (1.0 - decimal)
+    return (bottom <= n_1) and (n_1 <= top)
 
 
 def cool_text():
-    print("==============================")
-    print(" __      __       _      _\n"
-          " \\ \\    / /      | |    | |  \n"
-          "  \\ \\  / /__ _ __| | ___| |_\n"
-          "   \\ \\/ / _ \\ '__| |/ _ \\ __|\n"
-          "    \\  /  __/ |  | |  __/ |_\n"
-          "     \\/ \\___|_|  |_|\\___|\\__|")
-    print("==============================")
+    print("=================================")
+    print("=  __      __       _      _    =\n"
+          "=  \\ \\    / /      | |    | |   =\n"
+          "=   \\ \\  / /__ _ __| | ___| |_  =\n"
+          "=    \\ \\/ / _ \\ '__| |/ _ \\ __| =\n"
+          "=     \\  /  __/ |  | |  __/ |_  =\n"
+          "=      \\/ \\___|_|  |_|\\___|\\__| =")
+    print("=================================")
