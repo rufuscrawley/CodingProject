@@ -1,5 +1,3 @@
-from typing import Any
-
 import numpy as np
 
 from Body import Body
@@ -46,12 +44,12 @@ def centre_of_mass(bodies: list[Body]) -> Vector2D:
     return pos_com
 
 
-def get_total_var(body_n: int, body_list: list) -> list:
+def get_total_var(body_list: list, body_n: int) -> list:
     """
     Finds the total of a variable of a list.
-    :param body_n:
-    :param body_list:
-    :return:
+    :param body_n: Number of bodies in the list
+    :param body_list: The list to handle
+    :return: Total sum of the variable.
     """
     params = []
     final_vars = []
@@ -72,7 +70,7 @@ def is_within_percentage(n_1: float, n_2: float, percentage: float) -> bool:
     :param n_1:
     :param n_2:
     :param percentage: A percentage, out of 100.
-    :return:
+    :return: 1 if the conditions are met.
     """
     decimal = percentage / 200.0
     top = n_2 * (1.0 + decimal)
@@ -80,7 +78,11 @@ def is_within_percentage(n_1: float, n_2: float, percentage: float) -> bool:
     return (bottom <= n_1) and (n_1 <= top)
 
 
-def cool_text():
+def cool_text() -> None:
+    """
+    Just a flashy function to add a cool title.
+    :return: A cool title!
+    """
     print("=================================")
     print("=  __      __       _      _    =\n"
           "=  \\ \\    / /      | |    | |   =\n"
