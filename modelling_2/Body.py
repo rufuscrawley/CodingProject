@@ -59,8 +59,8 @@ class Body(object):
         :return: The angular momentum
         """
         # Find the r vector between us and the point of reference.
-        rel_pos = Vector2D(self.pos.x - ref_point.x,
-                           self.pos.y - ref_point.y)
+        rel_pos = Vector2D(self.pos.x,
+                           self.pos.y)
         # Find distance and velocity vectors.
         dist: float = np.sqrt(rel_pos.sq_mag())
         vel: float = np.sqrt(self.vel.sq_mag())
