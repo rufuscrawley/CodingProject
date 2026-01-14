@@ -69,7 +69,7 @@ def integration(bodies: list[Body], end: float, step: float,
                 output.energies[0].append(ke)
                 output.energies[1].append(gpe)
                 output.energies[2].append(ke + gpe)
-                output.ams.append((body.am(pos_cm)))
+                output.ams.append(body.am(pos_cm))
             t += step
             iterations += 1
             if np.log10(step) < 1:

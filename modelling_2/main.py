@@ -18,12 +18,12 @@ pylab.rcParams.update(params)
 def main():
     cool_text()
     # Read in the bodies that we are working with.
-    bodies: list[Body] = setup_bodies("csvs/figure_eight.csv")
+    bodies: list[Body] = setup_bodies("csvs/earth.csv")
     body_count = len(bodies)
     # Set the step count for our Verlet integration.
-    end, step = 9.0, 0.0001
+    end, step = 50_000_000, 10_000
     # Run the Verlet integration.
-    verlet = integration(bodies, end, step, True)
+    verlet = integration(bodies, end, step, False)
 
     # Guess period
     e_t = get_total_var(verlet.energies[2], body_count)
@@ -93,6 +93,7 @@ def main():
     if correct_times and mean:
         plt.vlines(mean, np.max(ams), np.min(ams), linestyles="dashed")
     plt.plot(np.arange(0, end, step).tolist(), ams)
+    plt.ylim(np.max(ams) * 0.5, np.max(ams) * 2)
     plt.xlabel("Time (s)")
     plt.ylabel("Angular momentum (kgm^2s^-1)")
     plt.show()
