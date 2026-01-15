@@ -73,7 +73,7 @@ def integration(bodies: list[Body], end: float, step: float,
             t += step
             iterations += 1
             if np.log10(step) < 1:
-                t = np.round(t, get_decimal_places(step))
+                t = np.round(t, get_decimal_places(step) + 1)
             bar()
     return output
 

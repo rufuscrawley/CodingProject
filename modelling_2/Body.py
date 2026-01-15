@@ -117,11 +117,10 @@ def setup_bodies(filename: str) -> list[Body]:
     # Read in our bodies from the file
     lines: pd.DataFrame = pd.read_csv(filename)
     # Iterate over each body and create a new Body object for each one
-    print(f"Found {len(lines)} bodies! Loading...")
+    print(f"Found {len(lines)} bodies!")
     for i in range(len(lines)):
         body = Body(lines.get("name")[i], lines.get("mass")[i],
                     Vector2D(lines.get("pos_x")[i], lines.get("pos_y")[i]),
                     Vector2D(lines.get("vel_x")[i], lines.get("vel_y")[i]))
         body_list.append(body)
-    print("Bodies loaded!")
     return body_list
