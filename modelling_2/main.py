@@ -44,7 +44,7 @@ system_dict = {
         "softener": 0.0001
     },
     "figure_eight": {
-        "end": 1.5,
+        "end": 6.5,
         "step": 0.001,
         "natural": True,
         "info": "This 3-body system looks like a figure-eight.",
@@ -82,8 +82,6 @@ def main(setup: str):
     verlet = integration(bodies, end, step, natural, softening_value)
 
     e_t = get_total_var(verlet.energies[2], body_count)
-    e_k = get_total_var(verlet.energies[0], body_count)
-    e_p = get_total_var(verlet.energies[1], body_count)
     # Store initial condition for later
     e_0 = e_t.pop(0)
 
@@ -148,7 +146,7 @@ def main(setup: str):
     energy_plot, ax = plt.subplots(2)
     ax[0].plot(np.arange(0, end, step).tolist(), e_t)
     # Map the change in energy.
-    d_e = list(map(lambda e: (e * 100 / e_0) - 100, e_t))
+    d_e = list(map(lambda e_map: (e_map * 100 / e_0) - 100, e_t))
     if periods and mean and not natural:
         ax[0].vlines(mean, np.max(e_t), np.min(e_t), linestyles="dashed")
         ax[1].vlines(mean, np.max(d_e), np.min(d_e), linestyles="dashed")
@@ -162,16 +160,20 @@ def main(setup: str):
     # noinspection PyUnusedLocal
     am_plot = plt.figure(3)
     ams = get_total_var(verlet.ams, body_count)
-    am_0 = ams[1]
-    d_ams = list(map(lambda am: (am * 100 / am_0) - 100, ams))
-    if periods and mean and not natural:
-        plt.vlines(mean, np.max(d_ams), np.min(d_ams), linestyles="dashed")
-    plt.plot(np.arange(0, end, step).tolist(), ams)
+    am_0 = ams[0]
+    if am_0 == 0:
+        d_ams = list(map(lambda am: (am * 100 / 1) - 100, ams))
+    else:
+        d_ams = list(map(lambda am: (am * 100 / am_0) - 100, ams))
+    # if periods and mean and not natural:
+    #     plt.vlines(mean, np.max(d_ams), np.min(d_ams), linestyles="dashed")
+    plt.plot(np.arange(0, end, step).tolist(), d_ams)
     plt.xlabel("Time (s)")
-    plt.ylabel("Angular momentum (kgm^2s^-1)")
+    plt.ylabel("Change in angular momentum (%) (kgm^2s^-1)")
     plt.show()
     print("Graphing completed!")
     print("=================================")
+
     print("Final variables:")
     print(f"E_0 = {e_0} J")
     print(f"am_0 = {am_0} angular momentums")

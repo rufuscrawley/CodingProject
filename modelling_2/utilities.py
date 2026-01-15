@@ -25,7 +25,7 @@ def integration(bodies: list[Body], end: float, step: float,
     :return: An array of the Body values involved
     """
     # Time to 0.
-    t: float = 0
+    t: float = 0.0
     iterations: int = 0
     total_steps = int(end / step)
     print(f"Beginning Verlet integration for {len(bodies)} bodies over {total_steps} steps.")
@@ -64,14 +64,13 @@ def integration(bodies: list[Body], end: float, step: float,
                 # We need to use deepcopy to not use "static" instance
                 # of the body!
                 output.bodies.append(deepcopy(body))
-                pos_cm = centre_of_mass(bodies)
                 ke = body.ke()
                 gpe = body.gpe(bodies, natural, softener)
+                am = body.am(pos_cm)
                 output.energies[0].append(ke)
                 output.energies[1].append(gpe)
                 output.energies[2].append(ke + (gpe / 2))
-                output.ams.append(deepcopy(body.am(pos_cm)))
-
+                output.ams.append(am)
             t += step
             iterations += 1
             if np.log10(step) < 1:

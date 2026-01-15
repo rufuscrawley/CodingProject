@@ -61,17 +61,21 @@ class Body(object):
         # Find the r vector between us and the point of reference.
         rel_pos = Vector2D(self.pos.x - ref_point.x,
                            self.pos.y - ref_point.y)
-        # rel_pos = Vector2D(self.pos.x,
-        #                    self.pos.y)
 
         # Find distance and velocity vectors.
         dist: float = np.sqrt(rel_pos.sq_mag())
         vel: float = np.sqrt(self.vel.sq_mag())
 
-        # L = m * v * r
-        # print(f"{self.mass} * {vel} * {dist}")
-        am = self.mass * vel * dist
-        return am
+        # L = r x p
+        # I understand I wrote my own vector implementation here, but ultimately
+        # it was causing bugs I could not troubleshoot here, so -
+        # here we temporarily use NumPy's cross-product function!
+        p = Vector2D(self.vel.x * self.mass, self.vel.y * self.mass)
+        p_array = np.array([p.x, p.y])
+        r_array = np.array([self.pos.x, self.pos.y])
+        am_np = np.cross(p_array, r_array)
+
+        return am_np
 
     def dist_squared(self, body) -> float:
         """
