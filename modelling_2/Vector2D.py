@@ -27,6 +27,6 @@ class Vector2D(object):
 
     def sq_mag(self):
         result = 0
-        result += np.pow(self.x, 2)
-        result += np.pow(self.y, 2)
+        result += self.x ** 2
+        result += self.y ** 2
         return result

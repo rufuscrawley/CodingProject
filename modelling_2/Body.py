@@ -26,9 +26,10 @@ class Body(object):
         # Redefined str() function for debugging values - may not be used in final build.
         return f"[{self.name}] - ({self.pos.x}, {self.pos.y}) @ ({self.vel.x}, {self.vel.y})"
 
-    def update_acceleration(self, bodies: list, natural: bool) -> None:
+    def update_acceleration(self, bodies: list, natural: bool, softener: float) -> None:
         """
         Updates the acceleration Vector2D of the body as per a Physics simulation.
+        :param softener: The softening parameter.
         :param natural: Whether to use natural units (G = 1) or not (G = 6.67E-11)
         :param bodies: The bodies acting upon this body.
         """
@@ -42,8 +43,7 @@ class Body(object):
             sq_dist: float = self.dist_squared(body)
             dist: float = np.sqrt(sq_dist)
             # Apply dampening
-            dampener = 0.0001 ** 2
-            magnitude: float = (G * body.mass) / (sq_dist + dampener)
+            magnitude: float = (G * body.mass) / (sq_dist + (softener ** 2))
             # Update the acceleration
             acc.x += magnitude * (body.pos.x - self.pos.x) / dist
             acc.y += magnitude * (body.pos.y - self.pos.y) / dist
@@ -61,11 +61,16 @@ class Body(object):
         # Find the r vector between us and the point of reference.
         rel_pos = Vector2D(self.pos.x - ref_point.x,
                            self.pos.y - ref_point.y)
+        # rel_pos = Vector2D(self.pos.x,
+        #                    self.pos.y)
+
         # Find distance and velocity vectors.
         dist: float = np.sqrt(rel_pos.sq_mag())
         vel: float = np.sqrt(self.vel.sq_mag())
-        # w = m * v * L
-        am = self.mass * dist * vel
+
+        # L = m * v * r
+        # print(f"{self.mass} * {vel} * {dist}")
+        am = self.mass * vel * dist
         return am
 
     def dist_squared(self, body) -> float:
@@ -88,7 +93,7 @@ class Body(object):
         energy = 0.5 * self.mass * self.vel.sq_mag()
         return energy
 
-    def gpe(self, bodies: list, natural: bool) -> float:
+    def gpe(self, bodies: list, natural: bool, softener: float) -> float:
         """
         Calculates the GPE of the body against nearby other bodies.
         :param bodies: A list of bodies that act upon this body.
@@ -99,11 +104,11 @@ class Body(object):
         # Should we use natural units?
         G = 1 if natural else 6.67E-11
         for body in bodies:
-            if self == body:
+            if self.name == body.name:
                 continue
             r_squared = self.dist_squared(body)
             # U = - GMm / r
-            result += -1 * (G * self.mass * body.mass) / np.sqrt(r_squared)
+            result -= (G * self.mass * body.mass) / (np.sqrt(r_squared) + softener)
         return result
 
 
