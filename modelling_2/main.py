@@ -64,7 +64,20 @@ system_dict = {
         "info": "This 3-body system looks like a bumblebee (if you squint).",
         "softener": 0.0001
     },
-
+    "moth": {
+        "end": 15.0,
+        "step": 0.0001,
+        "natural": True,
+        "info": "This 3-body system looks like a moth (if you squint).",
+        "softener": 0.001
+    },
+    "goggles": {
+        "end": 10.5,
+        "step": 0.00001,
+        "natural": True,
+        "info": "This 3-body system looks like a moth (if you squint).",
+        "softener": 0.0001
+    },
 }
 
 
