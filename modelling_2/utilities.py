@@ -169,3 +169,11 @@ def cool_text() -> None:
           "=     \\  /  __/ |  | |  __/ |_  =\n"
           "=      \\/ \\___|_|  |_|\\___|\\__| =")
     print("=================================")
+
+
+def line_text() -> None:
+    """
+    Again, just draws a divider line. Useful for my own CLI debugging.
+    :return:
+    """
+    print("=================================")

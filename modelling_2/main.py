@@ -130,11 +130,11 @@ def main(setup: str):
             # If we found any periods, output the relevant details
             mean = statistics.fmean(periods)
             error = ((mean * guess_percent) / np.sqrt(len(periods))) + step
-            print("=================================")
+            line_text()
             print(f"-> Predicted period: {mean} seconds (+/- {np.round(error, 3)})")
             print(f"-> (That's {mean / 86400} days (+/- {np.round(error / 86400, 3)}))")
             print(f"% uncertainty: {float(error * 100 / mean)}")
-            print("=================================")
+            line_text()
 
     # Put the initial energy back where it belongs.
     e_t.insert(0, e_0)
@@ -183,12 +183,14 @@ def main(setup: str):
     plt.ylabel("Change in angular momentum (%) (kgm^2s^-1)")
     plt.show()
     print("Graphing completed!")
-    print("=================================")
+
+    line_text()
 
     print("Final variables:")
     print(f"E_0 = {e_0} J")
     print(f"am_0 = {am_0} angular momentums")
-    print("=================================")
+
+    line_text()
 
 
 # Now begin central control flow
@@ -197,7 +199,7 @@ cool_text()
 print("Systems available:")
 for system in system_dict:
     print(f"-> {system}")
-print("=================================")
+line_text()
 # Ask for the user's input
 while True:
     try:
@@ -205,7 +207,7 @@ while True:
         if system in system_dict:
             print(f"System '{system}' found")
             print(system_dict[system]["info"])
-            print("=================================")
+            line_text()
             break
         else:
             print("Not found in dictionary, please try again")
