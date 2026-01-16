@@ -31,7 +31,7 @@ system_dict = {
     },
     "moon": {
         "end": 2_300_000,
-        "step": 100,
+        "step": 10,
         "natural": False,
         "info": "This system simulates the Moon orbiting the Earth.",
         "softener": 0.01
@@ -164,7 +164,7 @@ def main(setup: str):
         ax[0].vlines(mean, np.max(e_t), np.min(e_t), linestyles="dashed")
         ax[1].vlines(mean, np.max(d_e), np.min(d_e), linestyles="dashed")
     ax[0].set_ylabel("Total energy (J)")
-    ax[0].set_ylim(np.max(e_t) * 0.95, np.max(e_t) * 1.2)
+    # ax[0].set_ylim(np.max(e_t) * 0.95, np.max(e_t) * 1.2)
     ax[1].plot(np.arange(0, end, step).tolist(), d_e)
     ax[1].set_xlabel("Time (s)")
     ax[1].set_ylabel("% of total energy")
@@ -175,11 +175,9 @@ def main(setup: str):
     ams = get_total_var(verlet.ams, body_count)
     am_0 = ams[0]
     if am_0 == 0:
-        d_ams = list(map(lambda am: (am * 100 / 1) - 100, ams))
+        d_ams = list(map(lambda am: (am), ams))
     else:
         d_ams = list(map(lambda am: (am * 100 / am_0) - 100, ams))
-    # if periods and mean and not natural:
-    #     plt.vlines(mean, np.max(d_ams), np.min(d_ams), linestyles="dashed")
     plt.plot(np.arange(0, end, step).tolist(), d_ams)
     plt.xlabel("Time (s)")
     plt.ylabel("Change in angular momentum (%) (kgm^2s^-1)")
