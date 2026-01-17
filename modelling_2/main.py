@@ -19,63 +19,63 @@ system_dict = {
     "earth": {
         "end": 50_000_000,
         "step": 1000,
-        "natural": False,
+        "three_body": False,
         "info": "This system simulates the Earth orbiting the Sun.",
         "softener": 0.001
     },
     "mercury": {
         "end": 8_000_000,
         "step": 1000,
-        "natural": False,
+        "three_body": False,
         "info": "This system simulates Mercury orbiting the Sun.",
         "softener": 0.001
     },
     "moon": {
         "end": 2_300_000,
         "step": 10,
-        "natural": False,
+        "three_body": False,
         "info": "This system simulates the Moon orbiting the Earth.",
         "softener": 0.01
     },
     "three_body": {
         "end": 50_000_000,
         "step": 1_000,
-        "natural": False,
+        "three_body": False,
         "info": "This system simulates both the Earth and Mercury orbiting the Sun.",
         "softener": 0.0001
     },
     "figure_eight": {
         "end": 6.5,
         "step": 0.001,
-        "natural": True,
+        "three_body": True,
         "info": "This 3-body system looks like a figure-eight.",
         "softener": 0.0001
     },
     "butterfly": {
         "end": 7.1,
         "step": 0.00001,
-        "natural": True,
+        "three_body": True,
         "info": "This 3-body system looks like a butterfly.",
         "softener": 0.00001
     },
     "bumblebee": {
         "end": 64.5,
         "step": 0.0001,
-        "natural": True,
+        "three_body": True,
         "info": "This 3-body system looks like a bumblebee (if you squint).",
         "softener": 0.0001
     },
     "moth": {
         "end": 15.0,
         "step": 0.0001,
-        "natural": True,
+        "three_body": True,
         "info": "This 3-body system looks like a moth (if you squint).",
         "softener": 0.001
     },
     "goggles": {
         "end": 10.5,
         "step": 0.00001,
-        "natural": True,
+        "three_body": True,
         "info": "This 3-body system looks like a moth (if you squint).",
         "softener": 0.0001
     },
@@ -87,14 +87,14 @@ def main(setup: str):
     name = setup
     end = system_dict[setup]["end"]
     step = system_dict[setup]["step"]
-    natural = system_dict[setup]["natural"]
+    three_body = system_dict[setup]["three_body"]
     softening_value = system_dict[setup]["softener"]
 
     # Read in the bodies that we are working with.
     bodies: list[Body] = setup_bodies(f"csvs/{name}.csv")
     body_count = len(bodies)
     # Run the Verlet integration.
-    verlet = integration(bodies, end, step, natural, softening_value)
+    verlet = integration(bodies, end, step, three_body, softening_value)
 
     # Store initial condition for later
     e_t = get_total_var(verlet.energies[2], body_count)
@@ -108,7 +108,7 @@ def main(setup: str):
     guess_percent = 1E-5 / 100
     period = 0
     # If no successful guesses, guess more within a threshold percentage
-    if not natural:
+    if not three_body:
         while not periods:
             # Guess over each index n and energy e
             for n, e in enumerate(e_t):
@@ -146,7 +146,7 @@ def main(setup: str):
 
     # Now time to validate Kepler's 3rd law
     semi_major_axis: float = 0
-    if not natural:
+    if not three_body:
         print("Validating Kepler's 3rd law...")
         # Use Kepler's 3rd law to find a period
         semi_major_axis = np.pow((6.67E-11 * (bodies[0].mass + bodies[1].mass) * (period ** 2))
@@ -193,7 +193,7 @@ def main(setup: str):
     ax[0].plot(np.arange(0, end, step).tolist(), e_t)
     # Map the change in energy.
     d_e = list(map(lambda e_map: (e_map * 100 / e_0) - 100, e_t))
-    if periods and period and not natural:
+    if periods and period and not three_body:
         ax[0].vlines(period, np.max(e_t), np.min(e_t), linestyles="dashed")
         ax[1].vlines(period, np.max(d_e), np.min(d_e), linestyles="dashed")
     ax[0].set_ylabel("Total energy (J)")

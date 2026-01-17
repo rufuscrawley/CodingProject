@@ -58,15 +58,15 @@ def integration(bodies: list[Body], end: float, step: float,
                     continue
                 # First calculate the half-step velocities
                 body.accelerate(bodies, three_body, softener)
-                body.vel.x.add(body.acc.x * halfstep)
-                body.vel.y.add(body.acc.y * halfstep)
+                body.vel.x += (body.acc.x * halfstep)
+                body.vel.y += (body.acc.y * halfstep)
                 # Next, recalculate our position
-                body.pos.x.add(body.vel.x * step)
-                body.pos.y.add(body.vel.y * step)
+                body.pos.x += (body.vel.x * step)
+                body.pos.y += (body.vel.y * step)
                 # Then more half-step velocities
                 body.accelerate(bodies, three_body, softener)
-                body.vel.x.add(body.acc.x * halfstep)
-                body.vel.y.add(body.acc.y * halfstep)
+                body.vel.x += (body.acc.x * halfstep)
+                body.vel.y += (body.acc.y * halfstep)
                 # Now append to a list we can output
                 # We need to use deepcopy to not use "static" instance
                 # of the body!
@@ -80,8 +80,10 @@ def integration(bodies: list[Body], end: float, step: float,
                 output.ams.append(am)
             t += step
             iterations += 1
+            # Goodbye, floating point error
             if np.log10(step) < 1:
                 t = np.round(t, get_decimal_places(step) + 1)
+            # Update the progress bar
             bar()
     return output
 
@@ -125,8 +127,8 @@ def centre_of_mass(bodies: list[Body]) -> Vector2D:
     # Multiply over each body
     for body in bodies:
         total_mass += body.mass
-        pos.x.add(body.mass * body.pos.x)
-        pos.y.add(body.mass * body.pos.y)
+        pos.x += body.pos.x * body.mass
+        pos.y += body.pos.y * body.mass
     # Normalise CoM
     pos.multiply(1 / total_mass)
     return pos

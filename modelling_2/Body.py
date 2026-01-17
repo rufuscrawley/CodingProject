@@ -26,16 +26,16 @@ class Body(object):
         # Redefined str() function for debugging values - may not be used in final build.
         return f"[{self.name}] - ({self.pos.x}, {self.pos.y}) @ ({self.vel.x}, {self.vel.y})"
 
-    def accelerate(self, bodies: list, natural: bool, softener: float) -> None:
+    def accelerate(self, bodies: list, three_body: bool, softener: float) -> None:
         """
         Updates the acceleration Vector2D of the body as per a Physics simulation.
         :param softener: The softening parameter.
-        :param natural: Whether to use natural units (G = 1) or not (G = 6.67E-11)
+        :param three_body: Whether we're dealing with a three-body solution
         :param bodies: The bodies acting upon this body.
         """
         # Set up our variables
         acc = Vector2D(0, 0)
-        G = 1 if natural else 6.67E-11
+        G = 1 if three_body else 6.67E-11
         # Now calculate individual accelerations from each body
         for body in bodies:
             if self == body:
@@ -46,8 +46,8 @@ class Body(object):
             # Apply dampening
             magnitude: float = (G * body.mass) / (r_squared + (softener ** 2))
             # Update the acceleration
-            acc.x += magnitude * (body.pos.x - self.pos.x) / r
-            acc.y += magnitude * (body.pos.y - self.pos.y) / r
+            acc.x += (magnitude * (body.pos.x - self.pos.x) / r)
+            acc.y += (magnitude * (body.pos.y - self.pos.y) / r)
         # Update with the final calculated acceleration
         self.acc = acc
 
@@ -59,18 +59,17 @@ class Body(object):
         :param ref_point: The position of the point of reference
         :return: The angular momentum
         """
-        # Find the r vector between us and the point of reference.
-        r = Vector2D(self.pos.x - ref_point.x,
-                     self.pos.y - ref_point.y)
-        # L = r x p
         # I understand I wrote my own vector implementation here, but ultimately
         # it was causing bugs I could not troubleshoot here, so -
         # here we temporarily use NumPy's cross-product function!
+        # Find the r vector between us and the point of reference.
+        r = Vector2D(self.pos.x - ref_point.x,
+                     self.pos.y - ref_point.y)
         p = Vector2D(self.vel.x * self.mass, self.vel.y * self.mass)
         p_array = np.array([p.x, p.y])
         r_array = np.array([r.x, r.y])
-        am_np = np.cross(p_array, r_array)
-
+        # L = r x p
+        am_np = np.cross(r_array, p_array)
         return am_np
 
     def distance_to(self, body) -> float:
@@ -92,17 +91,17 @@ class Body(object):
         energy = 0.5 * self.mass * self.vel.magnitude()
         return energy
 
-    def gpe(self, bodies: list, natural: bool, softener: float) -> float:
+    def gpe(self, bodies: list, three_body: bool, softener: float) -> float:
         """
         Calculates the GPE of the body against nearby other bodies.
         :param softener: Softening parameter for the GPE.
         :param bodies: A list of bodies that act upon this body.
-        :param natural: Whether to use natural units in the calculation or not.
+        :param three_body: Whether we're dealing with a three-body solution.
         :return: The GPE of the body in [J].
         """
         result = 0
-        # Should we use natural units?
-        G = 1 if natural else 6.67E-11
+        # Should we use three_body units?
+        G = 1 if three_body else 6.67E-11
         for body in bodies:
             if self == body:
                 continue

@@ -15,8 +15,8 @@ class Vector2D(object):
         self.y *= scalar
 
     def add(self, scalar):
-        self.x += scalar
-        self.y += scalar
+        self.x += scalar.x
+        self.y += scalar.y
 
     def add_mult(self, scalar):
         self.x += self.x * scalar
