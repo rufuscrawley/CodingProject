@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class Vector2D(object):
     """
     Helper class to store a 2D vector. Features simple implementations of
@@ -25,7 +22,7 @@ class Vector2D(object):
         self.x += self.x * scalar
         self.y += self.y * scalar
 
-    def sq_mag(self):
+    def magnitude(self):
         result = 0
         result += self.x ** 2
         result += self.y ** 2

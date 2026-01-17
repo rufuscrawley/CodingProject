@@ -14,22 +14,29 @@ class VerletOutput(object):
 
     def __init__(self, bodies: list, energies: list[list], ams: list) -> None:
         self.bodies = bodies
-        self.energies = energies
+        self.energies = energies  # should be three lists for KE, GPE, and total E
         self.ams = ams
 
 
 def integration(bodies: list[Body], end: float, step: float,
-                natural: bool, softener: float) -> VerletOutput:
+                three_body: bool, softener: float) -> VerletOutput:
     """
     Performs Verlet integration over our system.
+    :param bodies: A list of bodies over which we iterate.
+    :param end: The total time the integration will run for
+    :param step: The timestep over which we integrate
+    :param three_body: Whether we are integrating the three-body solutions (and thus need to equate G = 1)
+    :param softener: The softener parameter to apply when bodies are close
     :return: An array of the Body values involved
     """
     # Time to 0.
     t: float = 0.0
     iterations: int = 0
     total_steps = int(end / step)
+    halfstep = step / 2
     print(f"Beginning Verlet integration for {len(bodies)} bodies over {total_steps} steps.")
     output = VerletOutput([], [[], [], []], [])
+    # Use a progress bar (implemented purely for any 30 minute simulations!)
     with alive_bar(total_steps) as bar:
         while (t + step) <= end:
             # Calculate the position of the centre of mass first.
@@ -38,7 +45,7 @@ def integration(bodies: list[Body], end: float, step: float,
                 if iterations == 0:
                     # For the first run, calculate all initial conditions.
                     E_k_0 = body.ke()
-                    E_p_0 = body.gpe(bodies, natural, softener)
+                    E_p_0 = body.gpe(bodies, three_body, softener)
                     E_t_0 = E_k_0 + (E_p_0 / 2)
                     L_0 = body.am(pos_cm)
                     # Now attach to all the lists.
@@ -50,22 +57,22 @@ def integration(bodies: list[Body], end: float, step: float,
                     # Move to the next loop
                     continue
                 # First calculate the half-step velocities
-                body.update_acceleration(bodies, natural, softener)
-                body.vel.x += (body.acc.x * (step / 2))
-                body.vel.y += (body.acc.y * (step / 2))
+                body.accelerate(bodies, three_body, softener)
+                body.vel.x.add(body.acc.x * halfstep)
+                body.vel.y.add(body.acc.y * halfstep)
                 # Next, recalculate our position
-                body.pos.x += (body.vel.x * step)
-                body.pos.y += (body.vel.y * step)
+                body.pos.x.add(body.vel.x * step)
+                body.pos.y.add(body.vel.y * step)
                 # Then more half-step velocities
-                body.update_acceleration(bodies, natural, softener)
-                body.vel.x += (body.acc.x * (step / 2))
-                body.vel.y += (body.acc.y * (step / 2))
+                body.accelerate(bodies, three_body, softener)
+                body.vel.x.add(body.acc.x * halfstep)
+                body.vel.y.add(body.acc.y * halfstep)
                 # Now append to a list we can output
                 # We need to use deepcopy to not use "static" instance
                 # of the body!
                 output.bodies.append(deepcopy(body))
                 ke = body.ke()
-                gpe = body.gpe(bodies, natural, softener)
+                gpe = body.gpe(bodies, three_body, softener)
                 am = body.am(pos_cm)
                 output.energies[0].append(ke)
                 output.energies[1].append(gpe)
@@ -79,21 +86,30 @@ def integration(bodies: list[Body], end: float, step: float,
     return output
 
 
-def get_time_input():
-    end = input("Please input the desired running time of the simulation in seconds: ")
-    step = input("Please input the desired time-step of the simulation in seconds: ")
-    return float(end), float(step)
-
-
 def split_list(target_list: list, offset: int, split: int) -> list:
+    """
+    Splits a list into a new single list that picks from every N values [from the original list].
+    :param target_list: The list to apply this operation to.
+    :param offset: The index to start at when splitting.
+    :param split: The number of values to split into.
+    :return:
+    """
+    # Create a new separate list
     return_list = target_list.copy()
+    # If offset is 0, we don't need to pop our original values
     if offset != 0:
         for i in range(offset):
             return_list.pop(0)
+    # Now grab the remaining values
     return return_list[::split]
 
 
-def get_decimal_places(value):
+def get_decimal_places(value: float) -> int:
+    """
+    Returns the number of decimal places of a floating point number.
+    Used to round numbers to mitigate floating-point error.
+    :param value: The number of which to get the decimal place value.
+    """
     return int(np.round(-np.log10(value)))
 
 
@@ -105,18 +121,15 @@ def centre_of_mass(bodies: list[Body]) -> Vector2D:
     """
     # Define initial conditions of our system
     total_mass = 0
-    pos_com = Vector2D(0, 0)
+    pos = Vector2D(0, 0)
     # Multiply over each body
     for body in bodies:
         total_mass += body.mass
-
-        pos_com.x += body.mass * body.pos.x
-        pos_com.y += body.mass * body.pos.y
-
+        pos.x.add(body.mass * body.pos.x)
+        pos.y.add(body.mass * body.pos.y)
     # Normalise CoM
-    pos_com.multiply(1 / total_mass)
-
-    return pos_com
+    pos.multiply(1 / total_mass)
+    return pos
 
 
 def get_total_var(body_list: list, body_n: int) -> list:

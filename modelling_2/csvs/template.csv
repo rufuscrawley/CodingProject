@@ -1,4 +1,3 @@
 name,mass,pos_x,pos_y,vel_x,vel_y
-x_1
-x_2
-x_3
+large_mass
+orbiting_object

@@ -26,7 +26,7 @@ class Body(object):
         # Redefined str() function for debugging values - may not be used in final build.
         return f"[{self.name}] - ({self.pos.x}, {self.pos.y}) @ ({self.vel.x}, {self.vel.y})"
 
-    def update_acceleration(self, bodies: list, natural: bool, softener: float) -> None:
+    def accelerate(self, bodies: list, natural: bool, softener: float) -> None:
         """
         Updates the acceleration Vector2D of the body as per a Physics simulation.
         :param softener: The softening parameter.
@@ -40,14 +40,15 @@ class Body(object):
         for body in bodies:
             if self == body:
                 continue
-            sq_dist: float = self.dist_squared(body)
-            dist: float = np.sqrt(sq_dist)
+            # Find our r vector
+            r_squared: float = self.distance_to(body)
+            r: float = np.sqrt(r_squared)
             # Apply dampening
-            magnitude: float = (G * body.mass) / (sq_dist + (softener ** 2))
+            magnitude: float = (G * body.mass) / (r_squared + (softener ** 2))
             # Update the acceleration
-            acc.x += magnitude * (body.pos.x - self.pos.x) / dist
-            acc.y += magnitude * (body.pos.y - self.pos.y) / dist
-        # Apply the final calculated acceleration
+            acc.x += magnitude * (body.pos.x - self.pos.x) / r
+            acc.y += magnitude * (body.pos.y - self.pos.y) / r
+        # Update with the final calculated acceleration
         self.acc = acc
 
     def am(self, ref_point: Vector2D) -> float:
@@ -59,25 +60,20 @@ class Body(object):
         :return: The angular momentum
         """
         # Find the r vector between us and the point of reference.
-        rel_pos = Vector2D(self.pos.x - ref_point.x,
-                           self.pos.y - ref_point.y)
-
-        # Find distance and velocity vectors.
-        dist: float = np.sqrt(rel_pos.sq_mag())
-        vel: float = np.sqrt(self.vel.sq_mag())
-
+        r = Vector2D(self.pos.x - ref_point.x,
+                     self.pos.y - ref_point.y)
         # L = r x p
         # I understand I wrote my own vector implementation here, but ultimately
         # it was causing bugs I could not troubleshoot here, so -
         # here we temporarily use NumPy's cross-product function!
         p = Vector2D(self.vel.x * self.mass, self.vel.y * self.mass)
         p_array = np.array([p.x, p.y])
-        r_array = np.array([self.pos.x, self.pos.y])
+        r_array = np.array([r.x, r.y])
         am_np = np.cross(p_array, r_array)
 
         return am_np
 
-    def dist_squared(self, body) -> float:
+    def distance_to(self, body) -> float:
         """
         Calculates the distance to a different body.
         :param body: Body to calculate distance to.
@@ -85,7 +81,7 @@ class Body(object):
         """
         dist_vector = Vector2D(self.pos.x - body.pos.x,
                                self.pos.y - body.pos.y)
-        return dist_vector.sq_mag()
+        return dist_vector.magnitude()
 
     def ke(self) -> float:
         """
@@ -93,13 +89,13 @@ class Body(object):
         :return: Kinetic energy in [J]
         """
         # E = 1/2 * m * v^2
-
-        energy = 0.5 * self.mass * self.vel.sq_mag()
+        energy = 0.5 * self.mass * self.vel.magnitude()
         return energy
 
     def gpe(self, bodies: list, natural: bool, softener: float) -> float:
         """
         Calculates the GPE of the body against nearby other bodies.
+        :param softener: Softening parameter for the GPE.
         :param bodies: A list of bodies that act upon this body.
         :param natural: Whether to use natural units in the calculation or not.
         :return: The GPE of the body in [J].
@@ -108,11 +104,11 @@ class Body(object):
         # Should we use natural units?
         G = 1 if natural else 6.67E-11
         for body in bodies:
-            if self.name == body.name:
+            if self == body:
                 continue
-            r_squared = self.dist_squared(body)
+            r = np.sqrt(self.distance_to(body))
             # U = - GMm / r
-            result -= (G * self.mass * body.mass) / (np.sqrt(r_squared) + softener)
+            result -= (G * self.mass * body.mass) / (r + softener)
         return result
 
 
@@ -124,6 +120,7 @@ def setup_bodies(filename: str) -> list[Body]:
     """
     body_list = []
     # Read in our bodies from the file
+    # Going to use Pandas because I'm familiar with this format from my Masters' project!
     lines: pd.DataFrame = pd.read_csv(filename)
     # Iterate over each body and create a new Body object for each one
     print(f"Found {len(lines)} bodies!")
