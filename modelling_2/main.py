@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 from Body import setup_bodies
 from utilities import *
 
+# You can find the project's GitHub with commit history at
+# https://github.com/rufuscrawley/CodingProject/tree/master/modelling_2
+# Please email me at rjc256@exeter.ac.uk if there are any issues with accessing the commit history
+
 # Change the global graphing parameters
 params = {'legend.fontsize': 'x-small',
           'axes.labelsize': 'x-small',
